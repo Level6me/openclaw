@@ -613,13 +613,17 @@ class SecurePrefs(
     context: Context,
     name: String,
   ): SharedPreferences =
-    EncryptedSharedPreferences.create(
-      context,
-      name,
-      masterKey,
-      EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-      EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-    )
+    try {
+      EncryptedSharedPreferences.create(
+        context,
+        name,
+        masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+      )
+    } catch (e: Throwable) {
+      context.getSharedPreferences("${name}.fallback", Context.MODE_PRIVATE)
+    }
 
   private fun loadOrCreateInstanceId(): String {
     val existing = plainPrefs.getString("node.instanceId", null)?.trim()
