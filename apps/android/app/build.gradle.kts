@@ -146,7 +146,7 @@ android {
 
   defaultConfig {
     applicationId = "ai.openclaw.app"
-    minSdk = 31
+    minSdk = 30
     targetSdk = 36
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     versionCode = openClawAndroidVersionCode
