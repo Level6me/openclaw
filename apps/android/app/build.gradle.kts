@@ -155,7 +155,7 @@ android {
     buildConfigField("String", "BUILD_TIMESTAMP", "\"$openClawBuildTimestamp\"")
     ndk {
       // Support all major ABIs — native libs are tiny (~47 KB per ABI)
-      abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+      abiFilters += listOf("arm64-v8a")
     }
   }
 
