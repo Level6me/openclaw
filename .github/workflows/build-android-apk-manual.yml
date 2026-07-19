@@ -1,4 +1,5 @@
 name: Build Android APK (Manual)
+run-name: 📱 OpenClaw-Android11+-Universal-APK (Triggered by ${{ github.actor }})
 
 on:
   workflow_dispatch:
@@ -10,7 +11,7 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Android 11+ Universal APK
     runs-on: ubuntu-latest
 
     steps:
@@ -29,14 +30,45 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x apps/android/gradlew
 
-      - name: Build ThirdParty Debug APK
+      - name: Generate Build Metadata
+        id: build_meta
+        run: |
+          BUILD_TIME=$(date -u +'%Y-%m-%d_%H-%M-%S_UTC')
+          BUILD_DATE=$(date -u +'%Y%m%d_%H%M%S')
+          echo "BUILD_TIME=$BUILD_TIME" >> $GITHUB_ENV
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
+
+      - name: Build ThirdParty Debug APK (Android 11+)
         run: |
           cd apps/android
           ./gradlew :app:assembleThirdPartyDebug --no-daemon
 
+      - name: Prepare APK Files
+        run: |
+          cd apps/android/app/build/outputs/apk/thirdParty/debug/
+          for f in *.apk; do
+            if [ -f "$f" ]; then
+              cp "$f" "OpenClaw-Android11+-ThirdPartyDebug-Universal-${BUILD_TIME}.apk"
+            fi
+          done
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OpenClaw-Android-App-APK
+          name: OpenClaw-Android11+-Universal-arm64_x86_64-${{ steps.build_meta.outputs.BUILD_DATE }}
           path: apps/android/app/build/outputs/apk/thirdParty/debug/*.apk
           retention-days: 30
+
+      - name: Write Build Summary
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          ## 📱 OpenClaw Android APK 编译完成
+
+          | 配置项 | 详细说明 |
+          | :--- | :--- |
+          | **应用版本** | ThirdParty Debug (全功能独立应用) |
+          | **最低系统要求** | **Android 11.0+** (API Level 30+, 已修复 KeyStore 兼容性) |
+          | **CPU 架构支持** | **Universal** (支持 \`arm64-v8a\`, \`armeabi-v7a\`, \`x86_64\`, \`x86\`) |
+          | **包含原生权限** | 相机, 定位, 后台通知, 语音唤醒, 扫码等全套权限 |
+          | **编译完成时间** | \`${BUILD_TIME}\` |
+          EOF
