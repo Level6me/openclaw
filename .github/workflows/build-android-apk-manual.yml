@@ -29,14 +29,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x apps/android/gradlew
 
-      - name: Build Debug APK
+      - name: Build ThirdParty Debug APK
         run: |
           cd apps/android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew :app:assembleThirdPartyDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OpenClaw-Android-APK
-          path: apps/android/app/build/outputs/apk/**/*.apk
+          name: OpenClaw-Android-App-APK
+          path: apps/android/app/build/outputs/apk/thirdParty/debug/*.apk
           retention-days: 30
